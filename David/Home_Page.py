@@ -24,12 +24,27 @@ st.markdown(
         --card:#ffffff;
         --border: rgba(37, 99, 235, 0.18);
         --shadow: 0 10px 25px rgba(2, 8, 23, 0.08);
+
+        /* Tell browser we are a LIGHT app (prevents forced-dark weirdness) */
+        color-scheme: light;
+      }
+
+      /* Disable Chrome forced dark mode / high-contrast overrides */
+      html{
+        -webkit-text-size-adjust: 100%;
+        forced-color-adjust: none;
       }
 
       /* App background */
       .stApp{
         background: radial-gradient(1200px 600px at 10% 0%, var(--blue-50) 0%, #ffffff 55%),
                     radial-gradient(900px 500px at 90% 15%, var(--blue-100) 0%, #ffffff 45%);
+        color: var(--ink) !important;
+      }
+
+      /* Force readable text everywhere (fix disappearing letters in dark Chrome) */
+      .stApp, .stMarkdown, label, p, span, div{
+        color: var(--ink) !important;
       }
 
       /* Header */
@@ -48,29 +63,31 @@ st.markdown(
         margin: 0;
         font-weight: 800;
         letter-spacing: 0.2px;
+        color: #fff !important;
       }
       .mh-header p{
         margin: 6px 0 0 0;
         opacity: 0.92;
         font-size: 14px;
+        color: #fff !important;
       }
 
       /* Cards */
       .mh-card{
         border: 1px solid var(--border);
-        background: var(--card);
+        background: var(--card) !important;
         border-radius: 18px;
         padding: 16px 16px 14px 16px;
         box-shadow: 0 6px 18px rgba(2, 8, 23, 0.06);
       }
       .mh-card h3{
         margin: 0 0 10px 0;
-        color: var(--ink);
+        color: var(--ink) !important;
         font-size: 16px;
         font-weight: 800;
       }
       .mh-meta{
-        color: var(--muted);
+        color: var(--muted) !important;
         font-size: 13px;
         margin-top: 6px;
       }
@@ -80,9 +97,9 @@ st.markdown(
         display:inline-block;
         padding: 4px 10px;
         border-radius: 999px;
-        background: var(--blue-50);
+        background: var(--blue-50) !important;
         border: 1px solid var(--blue-200);
-        color: var(--blue-700);
+        color: var(--blue-700) !important;
         font-weight: 700;
         font-size: 12px;
         margin-right: 6px;
@@ -90,11 +107,11 @@ st.markdown(
 
       /* Sidebar */
       section[data-testid="stSidebar"]{
-        background: linear-gradient(180deg, #ffffff 0%, var(--blue-50) 100%);
+        background: linear-gradient(180deg, #ffffff 0%, var(--blue-50) 100%) !important;
         border-right: 1px solid var(--border);
       }
-      section[data-testid="stSidebar"] .stMarkdown{
-        color: var(--ink);
+      section[data-testid="stSidebar"] *{
+        color: var(--ink) !important;
       }
 
       /* Buttons */
@@ -102,7 +119,7 @@ st.markdown(
         border-radius: 12px;
         border: 1px solid rgba(37,99,235,0.25);
         background: linear-gradient(135deg, var(--blue-600), var(--blue-500));
-        color: white;
+        color: white !important;
         font-weight: 800;
         padding: 0.55rem 0.9rem;
       }
@@ -116,22 +133,40 @@ st.markdown(
         border-radius: 12px;
         border: 1px solid rgba(37,99,235,0.25);
         background: linear-gradient(135deg, #0ea5e9, var(--blue-500));
-        color: white;
+        color: white !important;
         font-weight: 800;
         padding: 0.55rem 0.9rem;
       }
 
-      /* Inputs */
-      .stTextInput input, .stTextArea textarea{
+      /* Inputs - force light backgrounds + dark text */
+      input, textarea, select{
+        background-color: #ffffff !important;
+        color: var(--ink) !important;
+        caret-color: var(--ink);
         border-radius: 12px !important;
       }
+
+      /* Date input (Streamlit wraps it) */
       .stDateInput input{
+        background-color: #ffffff !important;
+        color: var(--ink) !important;
         border-radius: 12px !important;
+      }
+
+      /* Fix placeholder text disappearing */
+      ::placeholder{
+        color: #64748b !important;
+        opacity: 1;
+      }
+
+      /* Checkbox label text */
+      label span{
+        color: var(--ink) !important;
       }
 
       /* Small helpers */
       .muted{
-        color: var(--muted);
+        color: var(--muted) !important;
         font-size: 13px;
       }
       .kpi{
@@ -141,13 +176,13 @@ st.markdown(
       .kpi .box{
         flex: 1;
         border: 1px solid var(--border);
-        background: #fff;
+        background: #fff !important;
         border-radius: 18px;
         padding: 14px 14px;
         box-shadow: 0 6px 18px rgba(2, 8, 23, 0.06);
       }
       .kpi .label{
-        color: var(--muted);
+        color: var(--muted) !important;
         font-size: 12px;
         font-weight: 700;
         text-transform: uppercase;
@@ -155,16 +190,20 @@ st.markdown(
       }
       .kpi .value{
         margin-top: 6px;
-        color: var(--ink);
+        color: var(--ink) !important;
         font-size: 22px;
         font-weight: 900;
       }
 
-      /* Make dataframe headers a bit cleaner */
+      /* Make dataframe headers a bit cleaner + readable in dark Chrome */
       div[data-testid="stDataFrame"]{
         border-radius: 18px;
         overflow: hidden;
         border: 1px solid var(--border);
+      }
+      div[data-testid="stDataFrame"] *{
+        color: var(--ink) !important;
+        background-color: #ffffff !important;
       }
     </style>
     """,
@@ -263,7 +302,7 @@ def make_basic_cards(lines):
 def make_cloze_cards(lines):
     cards = []
     for ln in lines:
-        words = re.findall(r"[A-Za-z][A-Za-z\-]{3,}", ln)
+        words = re.findall(r"[A-Za-z][A-Za-z\\-]{3,}", ln)
         candidates = []
         for w in words:
             if w[0].isupper():
@@ -273,12 +312,12 @@ def make_cloze_cards(lines):
         candidates = list(dict.fromkeys(candidates))  # unique, keep order
         clozed = ln
         for i, term in enumerate(candidates[:2], start=1):
-            clozed = re.sub(rf"\b{re.escape(term)}\b", f"{{{{c{i}::{term}}}}}", clozed, count=1)
+            clozed = re.sub(rf"\\b{re.escape(term)}\\b", f"{{{{c{i}::{term}}}}}", clozed, count=1)
         cards.append({"Text": clozed, "Extra": "", "Tags": ""})
     return pd.DataFrame(cards)
 
 def df_to_tsv_bytes(df: pd.DataFrame):
-    return df.to_csv(sep="\t", index=False).encode("utf-8")
+    return df.to_csv(sep="\\t", index=False).encode("utf-8")
 
 init_db()
 
@@ -384,7 +423,7 @@ if page == "Dashboard":
                 for _, row in todays.iterrows():
                     tag = row["tag"].strip() or "No tag"
                     pr = row["priority"].strip() or "—"
-                    label = f"{row['title']}  \n<span class='pill'>{tag}</span><span class='pill'>{pr}</span>"
+                    label = f"{row['title']}  \\n<span class='pill'>{tag}</span><span class='pill'>{pr}</span>"
                     checked = st.checkbox(label, value=False, key=f"dash_{row['id']}")
                     st.markdown(
                         """
@@ -499,7 +538,6 @@ elif page == "Deadlines & Tasks":
                             st.rerun()
 
                 st.markdown("</div>", unsafe_allow_html=True)
-
 
 else:
     st.markdown('<div class="mh-card">', unsafe_allow_html=True)
