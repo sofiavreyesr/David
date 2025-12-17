@@ -9,7 +9,7 @@ DB_PATH = "med_helper.db"
 st.set_page_config(page_title="Med Helper", page_icon="🩺", layout="wide")
 
 # =========================
-# CSS: Dark-Chrome-proof + Top bar visible + Fix black submit button
+# CSS: Dark-Chrome-proof + Fix ugly right-side thick borders
 # =========================
 st.markdown(
     """
@@ -30,6 +30,10 @@ st.markdown(
         --border: rgba(37, 99, 235, 0.18);
         --shadow: 0 10px 25px rgba(2, 8, 23, 0.08);
 
+        --input-border: rgba(15, 23, 42, 0.18);
+        --input-border-strong: rgba(37, 99, 235, 0.45);
+        --focus-ring: rgba(59, 130, 246, 0.20);
+
         /* Prevent Chrome forced-dark weirdness */
         color-scheme: light;
       }
@@ -40,12 +44,12 @@ st.markdown(
       }
 
       /* ==========================
-         STREAMLIT TOP BAR (VISIBLE + LIGHT)
+         TOP BAR: visible + light
          ========================== */
       header[data-testid="stHeader"]{
         background: rgba(255,255,255,0.92) !important;
         backdrop-filter: blur(10px) !important;
-        border-bottom: 1px solid rgba(37,99,235,0.18) !important;
+        border-bottom: 1px solid var(--border) !important;
       }
       div[data-testid="stToolbar"]{
         background: transparent !important;
@@ -55,19 +59,14 @@ st.markdown(
         fill: var(--ink) !important;
         color: var(--ink) !important;
       }
-      header[data-testid="stHeader"] button,
-      div[data-testid="stToolbar"] button{
-        background: transparent !important;
-      }
       div[data-testid="stDecoration"]{
         background: transparent !important;
       }
 
       /* App background */
       .stApp{
-        background:
-          radial-gradient(1200px 600px at 10% 0%, var(--blue-50) 0%, #ffffff 55%),
-          radial-gradient(900px 500px at 90% 15%, var(--blue-100) 0%, #ffffff 45%);
+        background: radial-gradient(1200px 600px at 10% 0%, var(--blue-50) 0%, #ffffff 55%),
+                    radial-gradient(900px 500px at 90% 15%, var(--blue-100) 0%, #ffffff 45%);
         color: var(--ink) !important;
       }
 
@@ -76,7 +75,7 @@ st.markdown(
         color: var(--ink) !important;
       }
 
-      /* Header card */
+      /* Header */
       .mh-header{
         padding: 18px 18px 14px 18px;
         border: 1px solid var(--border);
@@ -143,37 +142,33 @@ st.markdown(
         color: var(--ink) !important;
       }
 
-      /* Buttons */
+      /* Buttons (force white text everywhere) */
       .stButton>button{
         border-radius: 12px !important;
         border: 1px solid rgba(37,99,235,0.25) !important;
         background: linear-gradient(135deg, var(--blue-600), var(--blue-500)) !important;
-        color: white !important;
         font-weight: 800 !important;
         padding: 0.55rem 0.9rem !important;
       }
-      .stButton>button:hover{
-        filter: brightness(0.98);
-        border-color: rgba(37,99,235,0.38);
-      }
-
-      /* ✅ FIX: Form submit button (was black block) */
-      div[data-testid="stFormSubmitButton"] > button{
-        border-radius: 12px !important;
-        border: 1px solid rgba(37,99,235,0.25) !important;
-        background: linear-gradient(135deg, var(--blue-600), var(--blue-500)) !important;
-        color: #ffffff !important;
-        font-weight: 800 !important;
-        padding: 0.55rem 0.9rem !important;
-      }
-      div[data-testid="stFormSubmitButton"] > button *{
+      .stButton>button, .stButton>button *{
         color: #ffffff !important;
         fill: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
       }
-      div[data-testid="stFormSubmitButton"] > button:hover{
-        filter: brightness(0.98) !important;
-        border-color: rgba(37,99,235,0.38) !important;
+
+      /* ✅ Fix form submit button (was black) */
+      div[data-testid="stFormSubmitButton"] > button{
+        border-radius: 12px !important;
+        border: 1px solid rgba(37,99,235,0.25) !important;
+        background: linear-gradient(135deg, var(--blue-600), var(--blue-500)) !important;
+        font-weight: 800 !important;
+        padding: 0.55rem 0.9rem !important;
+      }
+      div[data-testid="stFormSubmitButton"] > button,
+      div[data-testid="stFormSubmitButton"] > button *{
+        color: #ffffff !important;
+        fill: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
       }
 
       /* Download button */
@@ -186,17 +181,61 @@ st.markdown(
         padding: 0.55rem 0.9rem !important;
       }
 
-      /* Inputs (force light bg + dark text) */
+      /* ==========================
+         ✅ INPUT FIX (removes ugly thick right-side border)
+         ========================== */
+
+      /* 1) Reset ALL shadow/filters that dark-mode injects */
       input, textarea{
-        background-color: #ffffff !important;
-        color: var(--ink) !important;
-        caret-color: var(--ink);
-        border-radius: 12px !important;
+        box-shadow: none !important;
+        outline: none !important;
+        filter: none !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
       }
-      .stDateInput input{
-        background-color: #ffffff !important;
+
+      /* 2) Style Streamlit inputs consistently */
+      .stTextInput input, .stTextArea textarea, .stDateInput input,
+      div[data-testid="stNumberInput"] input{
+        background: #ffffff !important;
         color: var(--ink) !important;
+        border: 1px solid var(--input-border) !important;
         border-radius: 12px !important;
+        box-shadow: none !important;
+      }
+
+      /* 3) BaseWeb wrapper (this is the real culprit for the right-side thick border) */
+      div[data-baseweb="base-input"] > div,
+      div[data-baseweb="input"] > div{
+        background: #ffffff !important;
+        border: 1px solid var(--input-border) !important;
+        border-radius: 12px !important;
+        box-shadow: none !important;
+        outline: none !important;
+        filter: none !important;
+      }
+
+      /* 4) Fix the right-side DateInput button area */
+      div[data-testid="stDateInput"] button{
+        background: #ffffff !important;
+        border-left: 1px solid var(--input-border) !important;
+        box-shadow: none !important;
+        filter: none !important;
+      }
+      div[data-testid="stDateInput"] button svg{
+        fill: var(--ink) !important;
+        color: var(--ink) !important;
+      }
+
+      /* 5) Clean focus ring (pretty + consistent) */
+      input:focus, textarea:focus{
+        border: 1px solid var(--input-border-strong) !important;
+        box-shadow: 0 0 0 4px var(--focus-ring) !important;
+      }
+      div[data-baseweb="base-input"] > div:focus-within,
+      div[data-baseweb="input"] > div:focus-within{
+        border: 1px solid var(--input-border-strong) !important;
+        box-shadow: 0 0 0 4px var(--focus-ring) !important;
       }
 
       /* Placeholders */
@@ -205,7 +244,7 @@ st.markdown(
         opacity: 1;
       }
 
-      /* KPI */
+      /* KPI boxes */
       .kpi{
         display:flex;
         gap: 12px;
@@ -238,20 +277,21 @@ st.markdown(
         overflow: hidden;
         border: 1px solid var(--border);
       }
-      div[data-testid="stDataFrame"] *{
-        color: var(--ink) !important;
-        background-color: #ffffff !important;
-      }
 
-      /* Selectbox + listbox */
+      /* Selectbox */
       div[data-baseweb="select"] > div{
         background: #ffffff !important;
-        border: 1px solid rgba(15, 23, 42, 0.25) !important;
+        border: 1px solid var(--input-border) !important;
         border-radius: 12px !important;
+        box-shadow: none !important;
       }
-      div[data-baseweb="select"] span{ color: var(--ink) !important; }
-      div[data-baseweb="select"] svg{ color: var(--ink) !important; fill: var(--ink) !important; }
-
+      div[data-baseweb="select"] span{
+        color: var(--ink) !important;
+      }
+      div[data-baseweb="select"] svg{
+        color: var(--ink) !important;
+        fill: var(--ink) !important;
+      }
       ul[role="listbox"]{
         background: #ffffff !important;
         color: var(--ink) !important;
@@ -263,7 +303,7 @@ st.markdown(
         color: var(--ink) !important;
       }
 
-      /* Inline code pills */
+      /* Inline code in sidebar + app */
       section[data-testid="stSidebar"] .stMarkdown code,
       section[data-testid="stSidebar"] code,
       .stMarkdown code,
@@ -273,6 +313,8 @@ st.markdown(
         border: 1px solid rgba(37, 99, 235, 0.25) !important;
         border-radius: 8px !important;
         padding: 0.12rem 0.35rem !important;
+        box-shadow: none !important;
+        filter: none !important;
         -webkit-text-fill-color: #0f172a !important;
       }
 
@@ -281,6 +323,7 @@ st.markdown(
         background: #ffffff !important;
         color: #0f172a !important;
         border: 1px solid rgba(15,23,42,0.18) !important;
+        box-shadow:none !important;
       }
       div[data-testid="stNumberInput"] button svg{
         fill: #0f172a !important;
@@ -302,6 +345,7 @@ st.markdown(
         fill: #0f172a !important;
         color: #0f172a !important;
       }
+
     </style>
     """,
     unsafe_allow_html=True,
@@ -408,7 +452,7 @@ def make_basic_cards(lines):
 def make_cloze_cards(lines):
     cards = []
     for ln in lines:
-        words = re.findall(r"[A-Za-z][A-Za-z\\-]{3,}", ln)
+        words = re.findall(r"[A-Za-z][A-Za-z\-]{3,}", ln)
         candidates = []
         for w in words:
             if w[0].isupper():
@@ -418,12 +462,12 @@ def make_cloze_cards(lines):
         candidates = list(dict.fromkeys(candidates))
         clozed = ln
         for i, term in enumerate(candidates[:2], start=1):
-            clozed = re.sub(rf"\\b{re.escape(term)}\\b", f"{{{{c{i}::{term}}}}}", clozed, count=1)
+            clozed = re.sub(rf"\b{re.escape(term)}\b", f"{{{{c{i}::{term}}}}}", clozed, count=1)
         cards.append({"Text": clozed, "Extra": "", "Tags": ""})
     return pd.DataFrame(cards)
 
 def df_to_tsv_bytes(df: pd.DataFrame):
-    return df.to_csv(sep="\\t", index=False).encode("utf-8")
+    return df.to_csv(sep="\t", index=False).encode("utf-8")
 
 # =========================
 # APP
@@ -535,15 +579,6 @@ if page == "Dashboard":
                     pr = row["priority"].strip() or "—"
                     label = f"{row['title']}  \n<span class='pill'>{tag}</span><span class='pill'>{pr}</span>"
                     checked = st.checkbox(label, value=False, key=f"dash_{row['id']}")
-                    st.markdown(
-                        """
-                        <script>
-                        const blocks = window.parent.document.querySelectorAll('label');
-                        blocks.forEach(b => b.style.lineHeight = '1.1');
-                        </script>
-                        """,
-                        unsafe_allow_html=True,
-                    )
                     if checked:
                         set_done(int(row["id"]), True)
                         st.rerun()
@@ -710,4 +745,7 @@ else:
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-st.markdown("<div class='mh-meta'>Tip: Keep the file <code>med_helper.db</code> in the same folder so tasks stay saved.</div>", unsafe_allow_html=True)
+st.markdown(
+    "<div class='mh-meta'>Tip: Keep the file <code>med_helper.db</code> in the same folder so tasks stay saved.</div>",
+    unsafe_allow_html=True
+)
