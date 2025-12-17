@@ -158,6 +158,24 @@ st.markdown(
         background:transparent !important;
         color:var(--ink) !important;
       }
+
+      /* FORCE inline `code` styling (sidebar + main) */
+        section[data-testid="stSidebar"] .stMarkdown code,
+        section[data-testid="stSidebar"] code,
+        .stMarkdown code,
+        li code,
+        p code,
+        span code {
+          background-color: #eef2ff !important;
+          color: #0f172a !important;
+          border: 1px solid rgba(37, 99, 235, 0.25) !important;
+          border-radius: 8px !important;
+          padding: 0.12rem 0.35rem !important;
+          box-shadow: none !important;
+          filter: none !important;
+          -webkit-text-fill-color: #0f172a !important; /* fixes weird forced dark text */
+        }
+
     </style>
     """,
     unsafe_allow_html=True
