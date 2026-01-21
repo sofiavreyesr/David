@@ -10,6 +10,7 @@ st.set_page_config(page_title="Med Helper", page_icon="🩺", layout="wide")
 
 # =========================
 # CSS: Dark-Chrome-proof + Top bar visible + Fix black submit button
+# + Robust HTML tables (works even when st.dataframe gets weird under forced-dark)
 # =========================
 st.markdown(
     """
@@ -157,7 +158,7 @@ st.markdown(
         border-color: rgba(37,99,235,0.38);
       }
 
-      /* ✅ FORCE all Streamlit buttons (including Generate cards) to have white text */
+      /* ✅ FORCE all Streamlit buttons to have white text */
       .stButton > button,
       .stButton > button *{
         color: #ffffff !important;
@@ -165,7 +166,7 @@ st.markdown(
         -webkit-text-fill-color: #ffffff !important;
       }
 
-      /* ✅ FIX: Form submit button (was black block) */
+      /* ✅ FIX: Form submit button */
       div[data-testid="stFormSubmitButton"] > button{
         border-radius: 12px !important;
         border: 1px solid rgba(37,99,235,0.25) !important;
@@ -194,7 +195,7 @@ st.markdown(
         padding: 0.55rem 0.9rem !important;
       }
 
-      /* Inputs (force light bg + dark text) */
+      /* Inputs */
       input, textarea{
         background-color: #ffffff !important;
         color: var(--ink) !important;
@@ -207,7 +208,6 @@ st.markdown(
         border-radius: 12px !important;
       }
 
-      /* Placeholders */
       ::placeholder{
         color: #64748b !important;
         opacity: 1;
@@ -240,7 +240,7 @@ st.markdown(
         font-weight: 900;
       }
 
-      /* Dataframe */
+      /* st.dataframe (still used elsewhere) */
       div[data-testid="stDataFrame"]{
         border-radius: 18px;
         overflow: hidden;
@@ -309,6 +309,39 @@ st.markdown(
       div[data-baseweb="popover"] svg{
         fill: #0f172a !important;
         color: #0f172a !important;
+      }
+
+      /* =========================================================
+         ✅ Robust HTML table (use this instead of st.dataframe on Dashboard)
+         ========================================================= */
+      .mh-table{
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border: 1px solid rgba(37, 99, 235, 0.18);
+        border-radius: 14px;
+        overflow: hidden;
+        background: #ffffff !important;
+        color: #0f172a !important;
+      }
+      .mh-table th, .mh-table td{
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(15,23,42,0.08);
+        font-size: 14px;
+        background: #ffffff !important;
+        color: #0f172a !important;
+        -webkit-text-fill-color: #0f172a !important;
+        white-space: nowrap;
+      }
+      .mh-table th{
+        font-weight: 800;
+        background: #f8fafc !important;
+      }
+      .mh-table tr:last-child td{
+        border-bottom: none;
+      }
+      .mh-table td:nth-child(1){
+        white-space: normal;
       }
     </style>
     """,
@@ -387,6 +420,31 @@ def delete_task(task_id):
     cur.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
     conn.commit()
     conn.close()
+
+# =========================
+# HTML TABLE (robust)
+# =========================
+def render_table(df: pd.DataFrame):
+    if df is None or df.empty:
+        return ""
+    d = df.copy()
+    for c in d.columns:
+        d[c] = d[c].astype(str).replace("NaT", "").replace("None", "")
+
+    headers = "".join([f"<th>{c}</th>" for c in d.columns])
+    rows = []
+    for _, r in d.iterrows():
+        tds = "".join([f"<td>{r[c]}</td>" for c in d.columns])
+        rows.append(f"<tr>{tds}</tr>")
+
+    return f"""
+    <table class="mh-table">
+      <thead><tr>{headers}</tr></thead>
+      <tbody>
+        {''.join(rows)}
+      </tbody>
+    </table>
+    """
 
 # =========================
 # ANKI HELPERS
@@ -505,11 +563,9 @@ if page == "Dashboard":
             if due_7.empty:
                 st.success("Nothing due in the next 7 days.")
             else:
-                st.dataframe(
-                    due_7[["title", "due_date", "tag", "priority"]].sort_values("due_date"),
-                    use_container_width=True,
-                    hide_index=True
-                )
+                df_show = due_7[["title", "due_date", "tag", "priority"]].sort_values("due_date")
+                st.markdown(render_table(df_show), unsafe_allow_html=True)
+
         st.markdown("</div>", unsafe_allow_html=True)
 
         st.write("")
@@ -518,11 +574,8 @@ if page == "Dashboard":
         if tasks.empty or overdue.empty:
             st.caption("All clear.")
         else:
-            st.dataframe(
-                overdue[["title", "due_date", "tag", "priority"]].sort_values("due_date"),
-                use_container_width=True,
-                hide_index=True
-            )
+            df_show = overdue[["title", "due_date", "tag", "priority"]].sort_values("due_date")
+            st.markdown(render_table(df_show), unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
     with c2:
@@ -718,4 +771,7 @@ else:
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-st.markdown("<div class='mh-meta'>Tip: Keep the file <code>med_helper.db</code> in the same folder so tasks stay saved.</div>", unsafe_allow_html=True)
+st.markdown(
+    "<div class='mh-meta'>Tip: Keep the file <code>med_helper.db</code> in the same folder so tasks stay saved.</div>",
+    unsafe_allow_html=True,
+)
