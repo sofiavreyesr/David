@@ -240,7 +240,7 @@ st.markdown(
         font-weight: 900;
       }
 
-      /* Dataframe (base) */
+      /* Dataframe */
       div[data-testid="stDataFrame"]{
         border-radius: 18px;
         overflow: hidden;
@@ -309,32 +309,6 @@ st.markdown(
       div[data-baseweb="popover"] svg{
         fill: #0f172a !important;
         color: #0f172a !important;
-      }
-
-      /* =========================================================
-         ✅ FINAL FIX: dataframe text invisible until click (forced dark mode)
-         ========================================================= */
-      /* neutralize inversion/filter tricks some dark-mode systems use */
-      html, body, .stApp, div[data-testid="stDataFrame"]{
-        filter: none !important;
-      }
-
-      /* force readable text in grid cells + headers */
-      div[data-testid="stDataFrame"] [role="gridcell"],
-      div[data-testid="stDataFrame"] [role="columnheader"],
-      div[data-testid="stDataFrame"] [role="rowheader"],
-      div[data-testid="stDataFrame"] .stDataFrame{
-        color: #0f172a !important;
-        -webkit-text-fill-color: #0f172a !important;
-        background: #ffffff !important;
-      }
-
-      /* also catch any nested spans/divs inside cells */
-      div[data-testid="stDataFrame"] [role="gridcell"] *,
-      div[data-testid="stDataFrame"] [role="columnheader"] *{
-        color: #0f172a !important;
-        -webkit-text-fill-color: #0f172a !important;
-        background: transparent !important;
       }
     </style>
     """,
@@ -567,7 +541,7 @@ if page == "Dashboard":
                 for _, row in todays.iterrows():
                     tag = row["tag"].strip() or "No tag"
                     pr = row["priority"].strip() or "—"
-                    label = f"{row['title']}  \\n<span class='pill'>{tag}</span><span class='pill'>{pr}</span>"
+                    label = f"{row['title']}  \n<span class='pill'>{tag}</span><span class='pill'>{pr}</span>"
                     checked = st.checkbox(label, value=False, key=f"dash_{row['id']}")
                     st.markdown(
                         """
